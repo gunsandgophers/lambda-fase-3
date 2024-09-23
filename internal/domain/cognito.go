@@ -8,6 +8,7 @@ import (
 
 type CustomerServiceClient interface {
 	GetUser(username string) (*CognitoUser, error)
+	CreateUser(user *CognitoCreateUser) (*CognitoUser, error)
 }
 
 type CognitoClient struct {
@@ -17,6 +18,12 @@ type CognitoClient struct {
 
 type CognitoUser struct {
 	Id string
+	Username string
+	Name string
+	Email string
+}
+
+type CognitoCreateUser struct {
 	Username string
 	Name string
 	Email string
@@ -61,4 +68,34 @@ func (cc *CognitoClient) GetUser(username string) (*CognitoUser, error) {
 		}
 	}
 	return user, nil
+}
+
+func (cc *CognitoClient) CreateUser(user *CognitoCreateUser) (*CognitoUser, error) {
+
+	input := &cognito.AdminCreateUserInput{
+		MessageAction: aws.String("SUPPRESS"),
+		UserAttributes: []*cognito.AttributeType{
+			{Name: aws.String("email"), Value: aws.String(user.Email)},
+			{Name: aws.String("name"), Value: aws.String(user.Name)},
+		},
+		Username: &user.Username,
+		UserPoolId: aws.String(cc.userPoolId),
+	}
+	output, err := cc.client.AdminCreateUser(input)
+	if err != nil {
+		return nil, err
+	}
+	cognitoUser := &CognitoUser{
+		Username: *output.User.Username,
+	}
+	for _, attr := range output.User.Attributes {
+		if *attr.Name == "email" {
+			cognitoUser.Email = *attr.Value
+		} else if *attr.Name == "sub" {
+			cognitoUser.Id = *attr.Value
+		} else if *attr.Name == "name" {
+			cognitoUser.Name = *attr.Value
+		}
+	}
+	return cognitoUser, nil
 }

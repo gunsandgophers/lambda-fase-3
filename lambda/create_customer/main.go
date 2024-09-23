@@ -14,11 +14,12 @@ func main() {
 }
 
 func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	cpf, exists := request.QueryStringParameters["cpf"]
-	if !exists {
+	customerInput := &domain.CreateCustomerInput{}
+	err := json.Unmarshal([]byte(request.Body), customerInput)
+	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
-			Body: "CPF undefined",
+			Body: "Invalida body",
 		}, nil
 	}
 	customerService, err := domain.NewAwsCustomerService(
@@ -31,8 +32,8 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			Body: err.Error(),
 		}, nil
 	}
-	getCustomer := domain.NewGetCustomerUC(customerService)
-	customer, err := getCustomer.Execute(cpf)
+	createCustomer := domain.NewCreateCustomerUC(customerService)
+	customer, err := createCustomer.Execute(customerInput)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 400,
@@ -47,7 +48,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 		}, nil
 	}
 	response := events.APIGatewayProxyResponse{
-		StatusCode: 200,
+		StatusCode: 201,
 		Body: string(body),
 	}
 	return response, nil

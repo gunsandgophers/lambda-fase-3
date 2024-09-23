@@ -13,7 +13,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	getCustomer := domain.NewGetCustomerIdUC(customerService)
+	getCustomer := domain.NewGetCustomerUC(customerService)
 	customer, err := getCustomer.Execute("680.392.640-06")
 	if err != nil {
 		panic(err)
@@ -22,4 +22,19 @@ func main() {
 	fmt.Println(customer.Cpf)
 	fmt.Println(customer.Name)
 	fmt.Println(customer.Email)
+
+	createCustomer := domain.NewCreateCustomerUC(customerService)
+	input := &domain.CreateCustomerInput{
+		Name: "Joao",
+		Email: "joao@email.com",
+		Cpf: "854.151.090-56",
+	}
+	customerCreated, err := createCustomer.Execute(input)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(customerCreated.Id)
+	fmt.Println(customerCreated.Cpf)
+	fmt.Println(customerCreated.Name)
+	fmt.Println(customerCreated.Email)
 }

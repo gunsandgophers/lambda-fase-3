@@ -4,8 +4,6 @@ import (
 	"errors"
 	"regexp"
 	"strconv"
-
-	uuid "github.com/google/uuid"
 )
 
 type CPF struct {
@@ -99,7 +97,7 @@ func CreateCustomer(name string, email string, cpf string) (*Customer, error) {
 	}
 
 	return &Customer{
-		id:    uuid.NewString(),
+		id:    "",
 		name:  name,
 		email: emailVO,
 		cpf:   cpfVO,
