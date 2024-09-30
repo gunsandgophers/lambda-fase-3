@@ -1,0 +1,26 @@
+name: deploy_lambda_create_customer
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      -  name: Creating deployment zip
+         run: |
+          sudo apt install zip
+          mkdir -p ./build/lambda/create_customer
+          GOOS=linux GOARCH=amd64 go build -o ./build/lambda/create_customer/bootstrap lambda/create_customer/main.go
+          cd build/lambda/create_customer
+          zip create_customer.zip bootstrap
+      - name: lambda_code_update
+        run: |
+          aws lambda update-function-code --function-name create_customer --zip-file fileb://./build/lambda/create_customer/create_customer.zip
