@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"fmt"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	cognito "github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
@@ -98,4 +100,19 @@ func (cc *CognitoClient) CreateUser(user *CognitoCreateUser) (*CognitoUser, erro
 		}
 	}
 	return cognitoUser, nil
+}
+
+func (cc *CognitoClient) ListUser(sub string) {
+	input := &cognito.ListUsersInput{
+		UserPoolId: aws.String(cc.userPoolId),
+		Filter: aws.String(fmt.Sprintf("sub = \"%s\"", sub)),
+		Limit: aws.Int64(1),
+	}
+	output, err := cc.client.ListUsers(input)
+	if err != nil {
+		fmt.Println("DEU RUIM")
+		return
+	}
+
+	fmt.Println(output.String())
 }
