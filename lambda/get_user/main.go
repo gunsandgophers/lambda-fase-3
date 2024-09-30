@@ -6,6 +6,7 @@ import (
 
 	"encoding/json"
 
+	"github.com/gunsandgophers/lambda-fase-3/internal/config"
 	"github.com/gunsandgophers/lambda-fase-3/internal/domain"
 )
 
@@ -21,9 +22,11 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			Body: "CPF undefined",
 		}, nil
 	}
+	region := config.GetEnv("TC_AWS_REGION", "")
+	userPoolId := config.GetEnv("TC_AWS_COGNITO_USER_POOL_ID", "")
 	customerService, err := domain.NewAwsCustomerService(
-		"us-east-1",
-		"us-east-1_3ofqHwfxr",
+		region,
+		userPoolId,
 	)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
